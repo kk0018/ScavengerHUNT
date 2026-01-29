@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BechaCant Scavenger Explorer</title>
+    <title>BechaCant Scavenger Pro</title>
     <style>
         :root { --purple: #8e44ad; --aqua: #00f2ff; --dark: #121212; --grey: #2a2a2a; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
@@ -15,37 +15,49 @@
         .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; }
         .label { color: var(--aqua); font-weight: bold; }
 
-        /* Advanced Compass Style */
+        /* Symmetrical Compass Hub */
         #game-view { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         #compass-outer { 
-            position: relative; width: 180px; height: 180px; 
-            border: 2px solid var(--aqua); border-radius: 50%;
+            position: relative; width: 220px; height: 220px; 
+            border: 1px solid rgba(0, 242, 255, 0.3); border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
         }
         #compass-ring {
             position: absolute; width: 100%; height: 100%;
             transition: transform 0.1s linear;
         }
-        .direction { position: absolute; font-weight: bold; font-size: 1.2rem; color: var(--aqua); }
-        .n { top: 5px; left: 50%; transform: translateX(-50%); }
-        .s { bottom: 5px; left: 50%; transform: translateX(-50%); }
-        .e { right: 8px; top: 50%; transform: translateY(-50%); }
-        .w { left: 8px; top: 50%; transform: translateY(-50%); }
-        #needle { font-size: 2.5rem; transform: rotate(-45deg); z-index: 10; }
+        .direction { 
+            position: absolute; font-weight: 900; font-size: 1.4rem; color: var(--aqua);
+            width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+            transition: transform 0.1s linear; /* Counter-rotation for letters */
+        }
+        /* Positioning directions on the ring */
+        .n { top: 10px; left: calc(50% - 15px); }
+        .s { bottom: 10px; left: calc(50% - 15px); }
+        .e { right: 10px; top: calc(50% - 15px); }
+        .w { left: 10px; top: calc(50% - 15px); }
+
+        /* Symmetrical Crosshair Center */
+        #center-hub {
+            width: 60px; height: 60px; border: 2px solid var(--aqua); border-radius: 50%;
+            position: relative; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+        }
+        .crosshair-v { position: absolute; width: 2px; height: 20px; background: var(--aqua); }
+        .crosshair-h { position: absolute; width: 20px; height: 2px; background: var(--aqua); }
 
         #distance-big { font-size: 2.2rem; font-weight: 900; margin: 15px 0; color: var(--aqua); text-shadow: 0 0 10px rgba(0,242,255,0.5); }
 
-        /* Leaderboard Section - 5 Columns */
+        /* Leaderboard Section */
         #leaderboard-section { background: #1a1a1a; padding: 15px; border-radius: 25px 25px 0 0; border-top: 2px solid var(--purple); }
         .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         select { background: var(--grey); color: white; border: 1px solid var(--aqua); padding: 5px; border-radius: 5px; font-size: 0.75rem; }
         
-        .header-row { display: grid; grid-template-columns: 25px 1.2fr 0.8fr 1fr 60px; font-size: 0.65rem; color: var(--aqua); font-weight: bold; padding: 8px; border-bottom: 1px solid var(--grey); text-align: center; }
-        .entry { display: grid; grid-template-columns: 25px 1.2fr 0.8fr 1fr 60px; align-items: center; padding: 10px 5px; border-bottom: 1px solid #222; font-size: 0.8rem; text-align: center; }
+        .header-row { display: grid; grid-template-columns: 25px 1.2fr 1fr 1.1fr 60px; font-size: 0.65rem; color: var(--aqua); font-weight: bold; padding: 8px; border-bottom: 1px solid var(--grey); text-align: center; }
+        .entry { display: grid; grid-template-columns: 25px 1.2fr 1fr 1.1fr 60px; align-items: center; padding: 10px 5px; border-bottom: 1px solid #222; font-size: 0.8rem; text-align: center; }
         
         .name { text-align: left; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .befriend-btn { background: transparent; border: 1px solid var(--aqua); color: var(--aqua); border-radius: 4px; padding: 3px; font-size: 0.6rem; cursor: pointer; width: 100%; }
+        .befriend-btn { background: transparent; border: 1px solid var(--aqua); color: var(--aqua); border-radius: 4px; padding: 3px; font-size: 0.6rem; cursor: pointer; width: 90%; margin: 0 auto;}
         .points { font-family: monospace; color: var(--aqua); text-align: right; }
 
         .btn { width: 85%; padding: 15px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; margin: 10px auto; display: block;}
@@ -71,7 +83,10 @@
                 <div class="direction s">S</div>
                 <div class="direction w">W</div>
             </div>
-            <div id="needle">📍</div>
+            <div id="center-hub">
+                <div class="crosshair-v"></div>
+                <div class="crosshair-h"></div>
+            </div>
         </div>
         <div id="distance-big">-- m</div>
         <button id="start-btn" class="btn" onclick="startChallenge()">Initialize Scavenger</button>
@@ -89,14 +104,13 @@
         </div>
         
         <div class="header-row">
-            <span>#</span><span style="text-align:left">USER</span><span>MILES</span><span>SOCIAL</span><span style="text-align:right">PTS</span>
+            <span>#</span><span style="text-align:left">USER</span><span>MILEAGE</span><span>SOCIAL</span><span style="text-align:right">PTS</span>
         </div>
         <div id="leaderboard-list"></div>
     </div>
 
     <script>
         const target = { lat: 41.9772, lng: -91.6611 };
-        // data format: [Username, Points, Miles]
         const data = {
             city: [["CerealKiller", 1250, 4.2], ["RiverKing", 1100, 12.8], ["Quaker88", 950, 2.1], ["BCC_Founder", 800, 1.2], ["GrantK", 750, 0.8]],
             county: [["MarionMaster", 2100, 15.6], ["HiawathaHero", 1850, 9.4], ["CerealKiller", 1250, 4.2], ["LinnLurker", 1200, 22.1], ["ElyExplorer", 1000, 3.5]],
@@ -124,17 +138,21 @@
             navigator.geolocation.watchPosition(pos => {
                 const dist = haversine(pos.coords.latitude, pos.coords.longitude, target.lat, target.lng);
                 document.getElementById('distance-big').innerText = Math.round(dist) + "m";
-                
                 if (dist < 20) {
                     document.getElementById('move-status').innerText = "ARRIVED";
                     document.getElementById('qr-btn').style.display = 'block';
-                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
                 }
             }, null, { enableHighAccuracy: true });
 
             window.addEventListener('deviceorientationabsolute', e => {
                 const north = e.alpha || 0;
+                // Rotate the ring
                 document.getElementById('compass-ring').style.transform = `rotate(${-north}deg)`;
+                // Counter-rotate the individual letters so they stay upright
+                const letters = document.querySelectorAll('.direction');
+                letters.forEach(l => {
+                    l.style.transform = `rotate(${north}deg)`;
+                });
             }, true);
         }
 
@@ -146,7 +164,7 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        function simulateWin() { alert("Safe Place Foundation Challenge Verified!"); location.reload(); }
+        function simulateWin() { alert("Verified!"); location.reload(); }
         updateLeaderboard();
     </script>
 </body>
