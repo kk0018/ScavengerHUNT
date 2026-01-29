@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BechaCant Scavenger</title>
+    <title>BechaCant Scavenger Pro</title>
     <style>
         :root { --purple: #8e44ad; --aqua: #00f2ff; --dark: #121212; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
@@ -22,12 +22,19 @@
         /* Leaderboard Section */
         #leaderboard-section { background: #1a1a1a; padding: 20px; border-radius: 20px 20px 0 0; border-top: 2px solid var(--purple); }
         .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        select { background: #333; color: white; border: 1px solid var(--aqua); padding: 5px 10px; border-radius: 5px; }
+        select { background: #333; color: white; border: 1px solid var(--aqua); padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; }
         
-        .entry { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #333; }
-        .rank { color: var(--aqua); font-weight: bold; width: 30px; }
-        .name { flex-grow: 1; text-align: left; }
-        .points { font-family: monospace; color: var(--aqua); }
+        /* Grid-based Leaderboard for 4 columns */
+        .header-row { display: grid; grid-template-columns: 30px 1fr 1fr 80px; font-size: 0.7rem; color: var(--aqua); font-weight: bold; padding: 5px 10px; border-bottom: 1px solid #333; }
+        .entry { display: grid; grid-template-columns: 30px 1fr 1fr 80px; align-items: center; padding: 12px 10px; border-bottom: 1px solid #222; font-size: 0.85rem; }
+        
+        .rank { font-weight: bold; }
+        .name { text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 5px; }
+        .social { text-align: center; }
+        .points { text-align: right; font-family: monospace; color: var(--aqua); }
+
+        .befriend-btn { background: transparent; border: 1px solid var(--aqua); color: var(--aqua); border-radius: 4px; padding: 2px 6px; font-size: 0.65rem; cursor: pointer; }
+        .befriend-btn:hover { background: var(--aqua); color: var(--dark); }
 
         .btn { width: 80%; padding: 15px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; margin: 10px auto; }
         #start-btn { background: var(--aqua); color: var(--dark); }
@@ -39,9 +46,10 @@
     <header><h1>BECHACANT</h1></header>
 
     <div id="mission-card">
-        <div class="stat-row"><span class="label">OBJECTIVE</span><span>Safe Place Foundation</span></div>
+        <div class="stat-row"><span class="label">OBJECTIVE</span><span>Safe Place Foundation (Usually "Hidden")</span></div>
         <div class="stat-row"><span class="label">REWARD</span><span>50 Points</span></div>
         <div class="stat-row"><span class="label">STATUS</span><span id="move-status">LOCKED</span></div>
+        <div class="stat-row"><span class="label">DIST</span><span id="distance-small">--- m</span></div>
     </div>
 
     <div id="game-view">
@@ -55,17 +63,20 @@
         <div class="controls">
             <span style="font-weight:bold">LEADERBOARD</span>
             <select id="geo-filter" onchange="updateLeaderboard()">
-                <option value="city">Cedar Rapids</option>
-                <option value="county">Linn County</option>
-                <option value="state">Iowa State</option>
+                <option value="city">Cedar Rapids [City]</option>
+                <option value="county">Linn [County]</option>
+                <option value="state">Iowa [State]</option>
             </select>
+        </div>
+        
+        <div class="header-row">
+            <span>#</span><span>USER</span><span style="text-align:center">SOCIAL</span><span style="text-align:right">PTS</span>
         </div>
         <div id="leaderboard-list">
             </div>
     </div>
 
     <script>
-        // Target: Safe Place Foundation, Cedar Rapids
         const target = { lat: 41.9772, lng: -91.6611 };
         const data = {
             city: [["CerealKiller", 1250], ["RiverKing", 1100], ["QuakerOats88", 950], ["BCC_Founder", 800], ["GrantK", 750]],
@@ -80,7 +91,8 @@
                 <div class="entry">
                     <span class="rank">${i+1}</span>
                     <span class="name">${user[0]}</span>
-                    <span class="points">${user[1]} pts</span>
+                    <span class="social"><button class="befriend-btn" onclick="alert('Befriend Request Sent!')">+ BEFRIEND</button></span>
+                    <span class="points">${user[1]}</span>
                 </div>
             `).join('');
         }
@@ -91,7 +103,9 @@
             
             navigator.geolocation.watchPosition(pos => {
                 const dist = haversine(pos.coords.latitude, pos.coords.longitude, target.lat, target.lng);
-                document.getElementById('distance-big').innerText = Math.round(dist) + "m";
+                const dText = Math.round(dist) + "m";
+                document.getElementById('distance-big').innerText = dText;
+                document.getElementById('distance-small').innerText = dText;
                 
                 if (dist < 25) {
                     document.getElementById('move-status').innerText = "ARRIVED";
@@ -107,15 +121,13 @@
 
         function haversine(lat1, lon1, lat2, lon2) {
             const R = 6371000;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const dLat = (lat2-lat1)*Math.PI/180;
+            const dLon = (lon2-lon1)*Math.PI/180;
             const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        function simulateWin() { alert("Safe Place Foundation Challenge Complete! +50 Points."); location.reload(); }
-        
-        // Initial Load
+        function simulateWin() { alert("Challenge Verified!"); location.reload(); }
         updateLeaderboard();
     </script>
 </body>
