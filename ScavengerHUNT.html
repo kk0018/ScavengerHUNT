@@ -3,91 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BechaCant Scavenger Prototype</title>
+    <title>BechaCant Pro Scavenger</title>
     <style>
-        body { font-family: sans-serif; text-align: center; transition: background 0.5s; height: 100vh; margin: 0; display: flex; flex-direction: column; justify-content: center; }
-        #status { font-size: 2rem; font-weight: bold; margin-bottom: 20px; }
-        #distance { font-size: 1.2rem; }
+        body { font-family: 'Segoe UI', sans-serif; text-align: center; transition: background 0.4s; height: 100vh; margin: 0; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+        #status { font-size: 2.5rem; font-weight: 900; text-transform: uppercase; }
+        #distance { font-size: 1.2rem; margin: 10px; opacity: 0.8; }
+        #compass { font-size: 5rem; transition: transform 0.2s; display: inline-block; margin: 20px 0; }
         .hot { background-color: #ff4d4d; color: white; }
         .cold { background-color: #4da6ff; color: white; }
-        .on-fire { background-color: #ff0000; color: white; animation: blink 0.5s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        button { padding: 15px 30px; font-size: 1rem; cursor: pointer; border-radius: 10px; border: none; background: #333; color: white; }
+        .goal { background-color: #2ecc71; color: white; }
+        #qr-section { display: none; padding: 20px; border: 2px dashed white; margin: 20px; border-radius: 15px; }
+        button { padding: 20px 40px; font-size: 1.2rem; font-weight: bold; cursor: pointer; border-radius: 50px; border: none; background: #222; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
 
-    <div id="status">Ready to Hunt?</div>
-    <div id="distance">Distance: -- meters</div>
-    <br>
-    <button onclick="startHunt()">Start Hunt</button>
+    <div id="status">Ready?</div>
+    <div id="compass">⬆️</div>
+    <div id="distance">-- meters</div>
+
+    <div id="qr-section">
+        <p>You are here! Scan the Challenge QR Code to finish.</p>
+        <button onclick="simulateQRScan()">SCAN QR CODE</button>
+    </div>
+
+    <button id="start-btn" onclick="startHunt()">START CHALLENGE</button>
 
     <script>
-        // TARGET COORDINATES (Set these to your test location!)
-        // Default: Cedar Rapids Museum of Art
+        // TARGET: Set to your test spot (Lat/Long)
         const target = { lat: 41.9778, lng: -91.6656 }; 
-        
+        const WIN_RADIUS = 15; // Meters to trigger QR section
         let lastDistance = null;
+        let watchID = null;
 
         function startHunt() {
-            if (!navigator.geolocation) {
-                alert("Geolocation is not supported by your browser.");
-                return;
+            document.getElementById('start-btn').style.display = 'none';
+            
+            // Request Orientation for Compass (Required for iOS)
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission();
             }
 
-            document.querySelector('button').style.display = 'none';
-            document.getElementById('status').innerText = "Walking...";
-
-            // watchPosition updates in real-time as you move
-            navigator.geolocation.watchPosition(updatePosition, handleError, {
+            watchID = navigator.geolocation.watchPosition(updatePosition, handleError, {
                 enableHighAccuracy: true,
-                maximumAge: 0,
-                timeout: 5000
+                maximumAge: 1000 // Battery optimization: allow 1s cache
             });
+
+            window.addEventListener('deviceorientationabsolute', updateCompass, true);
         }
 
         function updatePosition(position) {
-            const userLat = position.coords.latitude;
-            const userLng = position.coords.longitude;
-            const dist = haversineDistance(userLat, userLng, target.lat, target.lng);
+            const user = { lat: position.coords.latitude, lng: position.coords.longitude };
+            const dist = haversine(user.lat, user.lng, target.lat, target.lng);
             
-            const distElement = document.getElementById('distance');
-            const statusElement = document.getElementById('status');
-            const body = document.body;
+            const distEl = document.getElementById('distance');
+            const statusEl = document.getElementById('status');
+            const qrSection = document.getElementById('qr-section');
+            const compassEl = document.getElementById('compass');
 
-            distElement.innerText = `Distance: ${Math.round(dist)} meters`;
+            distEl.innerText = `${Math.round(dist)} meters away`;
 
-            // Logic for Hot vs Cold
-            if (dist <= 20) {
-                statusElement.innerText = "CHALLENGE COMPLETE!";
-                body.className = "on-fire";
-            } else if (lastDistance === null) {
-                statusElement.innerText = "Find the Spot!";
-            } else if (dist < lastDistance) {
-                statusElement.innerText = "HOTTER!";
-                body.className = "hot";
+            // 1. BUFFER & WIN LOGIC
+            if (dist <= WIN_RADIUS) {
+                statusEl.innerText = "ARRIVED!";
+                document.body.className = "goal";
+                qrSection.style.display = "block";
+                compassEl.style.display = "none";
+                vibrate(500); // Success buzz
             } else {
-                statusElement.innerText = "COLDER...";
-                body.className = "cold";
+                qrSection.style.display = "none";
+                compassEl.style.display = "inline-block";
+                
+                // 2. HOT/COLD & HAPTIC GEIGER
+                if (lastDistance && dist < lastDistance) {
+                    statusEl.innerText = "HOTTER";
+                    document.body.className = "hot";
+                    vibrate(100); // Geiger tick
+                } else if (lastDistance && dist > lastDistance) {
+                    statusEl.innerText = "COLDER";
+                    document.body.className = "cold";
+                }
             }
-
             lastDistance = dist;
         }
 
-        // The Haversine Formula (Calculates distance in meters)
-        function haversineDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371000; // Earth radius in meters
+        // 3. COMPASS BEARING LOGIC
+        function updateCompass(event) {
+            if (!lastDistance) return;
+            // Simplified bearing - in a real app, you'd use the user's current GPS bearing
+            const bearing = 0; // This requires a more complex math lib for true "North" offset
+            document.getElementById('compass').style.transform = `rotate(${event.alpha}deg)`;
+        }
+
+        function vibrate(ms) {
+            if (navigator.vibrate) navigator.vibrate(ms);
+        }
+
+        function simulateQRScan() {
+            alert("BECHACANT CHALLENGE VERIFIED! 50 Points Added.");
+            location.reload(); 
+        }
+
+        function haversine(lat1, lon1, lat2, lon2) {
+            const R = 6371000;
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
             const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
                       Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        function handleError(err) {
-            console.warn(`ERROR(${err.code}): ${err.message}`);
-        }
+        function handleError(err) { console.warn(err); }
     </script>
 </body>
 </html>
