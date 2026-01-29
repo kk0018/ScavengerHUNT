@@ -50,7 +50,7 @@
         .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; }
         .label { color: var(--aqua); font-weight: bold; }
 
-        /* Branded Compass */
+        /* Branded Compass Hub */
         #game-view { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; }
         #compass-outer { 
             position: relative; width: 220px; height: 220px; 
@@ -70,14 +70,16 @@
         .e { right: 10px; top: calc(50% - 15px); }
         .w { left: 10px; top: calc(50% - 15px); }
 
-        #logo-hub {
+        /* Center Hub with Symmetrical Plus Sign */
+        #center-hub {
             width: 80px; height: 80px; border-radius: 50%;
             background: var(--dark); border: 2px solid var(--aqua);
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
-            z-index: 5; overflow: hidden;
+            z-index: 5; position: relative;
         }
-        #logo-hub img { width: 75%; height: 75%; object-fit: contain; }
+        .plus-v { position: absolute; width: 4px; height: 30px; background: var(--aqua); border-radius: 2px; }
+        .plus-h { position: absolute; width: 30px; height: 4px; background: var(--aqua); border-radius: 2px; }
 
         #distance-big { font-size: 2.2rem; font-weight: 900; margin: 15px 0; color: var(--aqua); text-shadow: 0 0 10px rgba(0,242,255,0.5); }
 
@@ -93,8 +95,8 @@
         .befriend-btn { background: transparent; border: 1px solid var(--aqua); color: var(--aqua); border-radius: 4px; padding: 3px; font-size: 0.6rem; cursor: pointer; width: 90%; display: block; margin: 0 auto;}
         
         .btn { width: 85%; padding: 15px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; margin: 10px auto; display: block; transition: 0.2s;}
-        #start-btn-init { background: var(--aqua); color: var(--dark); }
-        #main-start-btn { background: var(--aqua); color: var(--dark); }
+        #init-btn { background: var(--aqua); color: var(--dark); }
+        #main-start-btn { background: var(--aqua); color: var(--dark); box-shadow: 0 4px 15px rgba(0,242,255,0.3); }
         #qr-btn { display: none; background: #2ecc71; color: white; }
 
         footer { padding: 20px; text-align: center; margin-top: auto; }
@@ -108,7 +110,7 @@
             <h2 style="color:var(--aqua); margin:0; letter-spacing:1px;">JOIN CHALLENGE</h2>
             <p style="font-size:0.8rem; color:#aaa; margin-top:5px;">Enter your username to begin.</p>
             <input type="text" id="username-input" placeholder="Enter Name" maxlength="12">
-            <button class="btn" id="start-btn-init" onclick="registerUser()">INITIALIZE</button>
+            <button class="btn" id="init-btn" onclick="registerUser()">INITIALIZE</button>
         </div>
     </div>
 
@@ -126,8 +128,9 @@
                 <div class="direction n">N</div><div class="direction e">E</div>
                 <div class="direction s">S</div><div class="direction w">W</div>
             </div>
-            <div id="logo-hub">
-                <img src="logo.png" alt="B" id="becha-logo">
+            <div id="center-hub">
+                <div class="plus-v"></div>
+                <div class="plus-h"></div>
             </div>
         </div>
         <div id="distance-big">-- m</div>
@@ -156,11 +159,9 @@
     </footer>
 
     <script>
-        // Target: Safe Place Foundation, Cedar Rapids
         const target = { lat: 41.9772, lng: -91.6611 };
         let currentUser = localStorage.getItem('bechaUser') || null;
 
-        // Base Simulated Data
         let leaderboardData = {
             city: [["CerealKiller", 1250, 4.2], ["RiverKing", 1100, 12.8], ["Quaker88", 950, 2.1], ["GrantK", 750, 0.8]],
             county: [["MarionMaster", 2100, 15.6], ["HiawathaHero", 1850, 9.4], ["LinnLurker", 1200, 22.1], ["ElyExplorer", 1000, 3.5]],
@@ -188,7 +189,6 @@
             const list = document.getElementById('leaderboard-list');
             let displayList = [...leaderboardData[filter]];
 
-            // Insert live tester and pop the lowest ranked dummy
             if (currentUser) {
                 if (!displayList.find(u => u[0] === currentUser)) {
                     displayList.pop(); 
@@ -213,7 +213,6 @@
             document.getElementById('main-start-btn').style.display = 'none';
             document.getElementById('move-status').innerText = "SEARCHING";
             
-            // Required for mobile browsers to allow orientation
             if (typeof DeviceOrientationEvent.requestPermission === 'function') {
                 DeviceOrientationEvent.requestPermission();
             }
@@ -232,7 +231,6 @@
             window.addEventListener('deviceorientationabsolute', e => {
                 const north = e.alpha || 0;
                 document.getElementById('compass-ring').style.transform = `rotate(${-north}deg)`;
-                // Keep Letters Upright
                 document.querySelectorAll('.direction').forEach(l => {
                     l.style.transform = `rotate(${north}deg)`;
                 });
