@@ -70,7 +70,7 @@
         .entry { display: grid; grid-template-columns: 25px 1.2fr 1fr 1.1fr 60px; align-items: center; padding: 10px 5px; border-bottom: 1px solid #222; font-size: 0.8rem; text-align: center; }
 
         /* Branded Social Button */
-        .befriend-btn { 
+        .follow-btn { 
             background: linear-gradient(135deg, var(--purple), #6c3483); 
             border: 1px solid var(--aqua); 
             color: white; 
@@ -83,7 +83,7 @@
             margin: 0 auto;
             text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
-        .befriend-btn:hover { background: var(--aqua); color: var(--dark); border-color: var(--purple); }
+        .follow-btn:hover { background: var(--aqua); color: var(--dark); border-color: var(--purple); }
 
         /* Custom Toast Notification */
         #toast {
@@ -109,7 +109,7 @@
 </head>
 <body>
 
-    <div id="toast">Friend Request Sent!</div>
+    <div id="toast">Now following!</div>
 
     <div id="reg-overlay">
         <div id="reg-box">
@@ -159,7 +159,7 @@
             <h3 style="margin-top:0; font-size:0.8rem; color:var(--aqua); text-transform:uppercase; letter-spacing:1px;">Scavenger Clues</h3>
             <div class="hint-item">
                 <div class="hint-label">Clue #1</div>
-                <div class="hint-text" id="hint-1">Addiction Recovery</div>
+                <div class="hint-text locked" id="hint-1">Addiction Recovery</div>
             </div>
             <div class="hint-item">
                 <div class="hint-label">Clue #2 <span id="timer-2" class="timer">30<small>s</small></span></div>
@@ -210,13 +210,16 @@
 
         function showToast(name) {
             const t = document.getElementById("toast");
-            t.innerText = `Request sent to ${name}!`;
+            t.innerText = `Following ${name}!`;
             t.className = "show";
             setTimeout(() => { t.className = t.className.replace("show", ""); }, 3000);
         }
 
         function startHintTimers() {
             let seconds = 0;
+            // Unlock Clue #1 Immediately
+            document.getElementById('hint-1').classList.remove('locked');
+
             if(hintInterval) clearInterval(hintInterval);
             hintInterval = setInterval(() => {
                 seconds++;
@@ -244,8 +247,8 @@
                 <div class="entry" style="${u[0] === currentUser ? 'background:rgba(0,242,255,0.1)' : ''}">
                     <span class="rank">${i+1}</span><span class="name" style="${u[0] === currentUser ? 'color:var(--aqua)' : ''}">${u[0]}</span>
                     <span>${u[2]} MI</span><span class="social">
-                        <button class="befriend-btn" onclick="${u[0] === currentUser ? 'alert(\'This is your profile!\')' : `showToast('${u[0]}')`}">
-                            ${u[0] === currentUser ? 'PROFILE' : '+ BEFRIEND'}
+                        <button class="follow-btn" onclick="${u[0] === currentUser ? 'alert(\'This is your profile!\')' : `showToast('${u[0]}')`}">
+                            ${u[0] === currentUser ? 'PROFILE' : '+ FOLLOW'}
                         </button>
                     </span><span style="color:var(--aqua)">${u[1]}</span>
                 </div>
