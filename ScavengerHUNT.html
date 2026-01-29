@@ -3,172 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BechaCant Scavenger Challenge</title>
+    <title>BechaCant Scavenger</title>
     <style>
-        :root {
-            --becha-purple: #8e44ad;
-            --becha-aqua: #00f2ff;
-            --becha-dark: #1a1a1a;
-        }
+        :root { --purple: #8e44ad; --aqua: #00f2ff; --dark: #121212; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
+        
+        header { padding: 15px; background: linear-gradient(to right, var(--purple), var(--dark)); border-bottom: 2px solid var(--aqua); text-align: center; }
+        h1 { margin: 0; font-size: 1.5rem; color: var(--aqua); letter-spacing: 3px; }
 
-        body { 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
-            text-align: center; 
-            background-color: var(--becha-dark);
-            color: white;
-            margin: 0; 
-            display: flex; 
-            flex-direction: column; 
-            height: 100vh;
-            overflow: hidden;
-        }
+        #mission-card { margin: 15px; padding: 15px; border-radius: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(0,242,255,0.3); }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
+        .label { color: var(--aqua); font-weight: bold; }
 
-        /* Top Header */
-        header {
-            padding: 20px;
-            background: linear-gradient(135deg, var(--becha-purple), var(--becha-dark));
-            border-bottom: 3px solid var(--becha-aqua);
-        }
+        #game-view { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        #compass { font-size: 4rem; transition: transform 0.1s linear; filter: drop-shadow(0 0 10px var(--aqua)); }
+        #distance-big { font-size: 2.5rem; font-weight: 900; margin: 10px 0; color: var(--aqua); }
 
-        h1 { margin: 0; font-size: 1.8rem; letter-spacing: 2px; color: var(--becha-aqua); }
+        /* Leaderboard Section */
+        #leaderboard-section { background: #1a1a1a; padding: 20px; border-radius: 20px 20px 0 0; border-top: 2px solid var(--purple); }
+        .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        select { background: #333; color: white; border: 1px solid var(--aqua); padding: 5px 10px; border-radius: 5px; }
+        
+        .entry { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #333; }
+        .rank { color: var(--aqua); font-weight: bold; width: 30px; }
+        .name { flex-grow: 1; text-align: left; }
+        .points { font-family: monospace; color: var(--aqua); }
 
-        /* Mission Briefing Box */
-        #mission-box {
-            margin: 20px;
-            padding: 15px;
-            border: 1px solid var(--becha-aqua);
-            border-radius: 12px;
-            background: rgba(0, 242, 255, 0.05);
-            text-align: left;
-        }
-
-        .label { color: var(--becha-aqua); font-weight: bold; font-size: 0.8rem; text-transform: uppercase; }
-        .value { margin-bottom: 10px; font-size: 1.1rem; }
-
-        /* Compass Section */
-        #compass-container {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #north-arrow {
-            font-size: 5rem;
-            transition: transform 0.1s linear;
-            filter: drop-shadow(0 0 10px var(--becha-aqua));
-        }
-
-        #status-text { font-size: 2rem; font-weight: 900; margin-top: 10px; color: var(--becha-aqua); }
-
-        /* QR & Start Buttons */
-        .btn {
-            margin: 20px;
-            padding: 20px;
-            background: var(--becha-aqua);
-            color: var(--becha-dark);
-            border: none;
-            border-radius: 50px;
-            font-weight: bold;
-            font-size: 1.2rem;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-
-        #qr-section { display: none; padding: 20px; }
-        .hot { color: #ff4d4d !important; }
+        .btn { width: 80%; padding: 15px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; margin: 10px auto; }
+        #start-btn { background: var(--aqua); color: var(--dark); }
+        #qr-btn { display: none; background: #2ecc71; color: white; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>BECHACANT</h1>
-    </header>
+    <header><h1>BECHACANT</h1></header>
 
-    <div id="mission-box">
-        <div class="label">Objective</div>
-        <div class="value" id="obj-text">Navigate to the Hidden Landmark</div>
-        
-        <div class="label">Reward</div>
-        <div class="value">50 Becha-Points + Badge</div>
-        
-        <div class="label">Current Distance</div>
-        <div class="value" id="distance">--- meters</div>
+    <div id="mission-card">
+        <div class="stat-row"><span class="label">OBJECTIVE</span><span>Safe Place Foundation</span></div>
+        <div class="stat-row"><span class="label">REWARD</span><span>50 Points</span></div>
+        <div class="stat-row"><span class="label">STATUS</span><span id="move-status">LOCKED</span></div>
     </div>
 
-    <div id="compass-container">
-        <div id="north-arrow">🧭</div>
-        <div id="status-text">LOCKED</div>
+    <div id="game-view">
+        <div id="compass">🧭</div>
+        <div id="distance-big">-- m</div>
+        <button id="start-btn" class="btn" onclick="startChallenge()">Start Hunt</button>
+        <button id="qr-btn" class="btn" onclick="simulateWin()">Scan QR Code</button>
     </div>
 
-    <div id="qr-section">
-        <button class="btn" onclick="simulateQRScan()">SCAN QR TO FINISH</button>
+    <div id="leaderboard-section">
+        <div class="controls">
+            <span style="font-weight:bold">LEADERBOARD</span>
+            <select id="geo-filter" onchange="updateLeaderboard()">
+                <option value="city">Cedar Rapids</option>
+                <option value="county">Linn County</option>
+                <option value="state">Iowa State</option>
+            </select>
+        </div>
+        <div id="leaderboard-list">
+            </div>
     </div>
-
-    <button id="start-btn" class="btn" onclick="startHunt()">Initialize Scavenger</button>
 
     <script>
-        // TARGET: Set to your test spot
-        const target = { lat: 41.9778, lng: -91.6656 }; 
-        let lastDistance = null;
+        // Target: Safe Place Foundation, Cedar Rapids
+        const target = { lat: 41.9772, lng: -91.6611 };
+        const data = {
+            city: [["CerealKiller", 1250], ["RiverKing", 1100], ["QuakerOats88", 950], ["BCC_Founder", 800], ["GrantK", 750]],
+            county: [["MarionMaster", 2100], ["HiawathaHero", 1850], ["CerealKiller", 1250], ["LinnLurker", 1200], ["ElyExplorer", 1000]],
+            state: [["DM_InsuranceGuy", 5000], ["HawkeyeFan1", 4200], ["CyclonePower", 3900], ["MarionMaster", 2100], ["IowaCityIntel", 1950]]
+        };
 
-        function startHunt() {
-            document.getElementById('start-btn').style.display = 'none';
-            document.getElementById('status-text').innerText = "SEARCHING...";
-
-            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                DeviceOrientationEvent.requestPermission();
-            }
-
-            navigator.geolocation.watchPosition(updatePosition, handleError, {
-                enableHighAccuracy: true,
-                maximumAge: 1000
-            });
-
-            window.addEventListener('deviceorientationabsolute', (e) => {
-                // The arrow rotates counter to your phone to always stay North
-                const north = e.alpha || 0;
-                document.getElementById('north-arrow').style.transform = `rotate(${-north}deg)`;
-            }, true);
+        function updateLeaderboard() {
+            const filter = document.getElementById('geo-filter').value;
+            const list = document.getElementById('leaderboard-list');
+            list.innerHTML = data[filter].map((user, i) => `
+                <div class="entry">
+                    <span class="rank">${i+1}</span>
+                    <span class="name">${user[0]}</span>
+                    <span class="points">${user[1]} pts</span>
+                </div>
+            `).join('');
         }
 
-        function updatePosition(position) {
-            const dist = haversine(position.coords.latitude, position.coords.longitude, target.lat, target.lng);
-            const distEl = document.getElementById('distance');
-            const statusEl = document.getElementById('status-text');
+        function startChallenge() {
+            document.getElementById('start-btn').style.display = 'none';
+            document.getElementById('move-status').innerText = "SEARCHING";
+            
+            navigator.geolocation.watchPosition(pos => {
+                const dist = haversine(pos.coords.latitude, pos.coords.longitude, target.lat, target.lng);
+                document.getElementById('distance-big').innerText = Math.round(dist) + "m";
+                
+                if (dist < 25) {
+                    document.getElementById('move-status').innerText = "ARRIVED";
+                    document.getElementById('qr-btn').style.display = 'block';
+                }
+            }, null, { enableHighAccuracy: true });
 
-            distEl.innerText = `${Math.round(dist)} meters`;
-
-            if (dist <= 20) {
-                statusEl.innerText = "ARRIVED!";
-                document.getElementById('qr-section').style.display = "block";
-            } else if (lastDistance && dist < lastDistance) {
-                statusEl.innerText = "HOTTER";
-                statusEl.className = "hot";
-                if (navigator.vibrate) navigator.vibrate(100);
-            } else {
-                statusEl.innerText = "COLDER";
-                statusEl.className = "";
-            }
-            lastDistance = dist;
+            window.addEventListener('deviceorientationabsolute', e => {
+                const north = e.alpha || 0;
+                document.getElementById('compass').style.transform = `rotate(${-north}deg)`;
+            }, true);
         }
 
         function haversine(lat1, lon1, lat2, lon2) {
             const R = 6371000;
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        function simulateQRScan() {
-            alert("SUCCESS! Reward Claimed.");
-            location.reload();
-        }
-
-        function handleError(err) { alert("GPS Error: " + err.message); }
+        function simulateWin() { alert("Safe Place Foundation Challenge Complete! +50 Points."); location.reload(); }
+        
+        // Initial Load
+        updateLeaderboard();
     </script>
 </body>
 </html>
