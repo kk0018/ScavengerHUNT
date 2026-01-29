@@ -6,20 +6,55 @@
     <title>BechaCant Scavenger Pro</title>
     <style>
         :root { --purple: #8e44ad; --aqua: #00f2ff; --dark: #121212; --grey: #2a2a2a; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
         
-        header { padding: 15px; background: linear-gradient(to right, var(--purple), var(--dark)); border-bottom: 2px solid var(--aqua); text-align: center; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: var(--dark); 
+            color: white; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh; 
+            overflow-x: hidden; 
+        }
+        
+        header { 
+            padding: 15px; 
+            background: linear-gradient(to right, var(--purple), var(--dark)); 
+            border-bottom: 2px solid var(--aqua); 
+            text-align: center; 
+        }
+        
         h1 { margin: 0; font-size: 1.5rem; color: var(--aqua); letter-spacing: 3px; }
 
+        /* Registration Overlay */
+        #reg-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(18, 18, 18, 0.98);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100; text-align: center; padding: 20px; box-sizing: border-box;
+        }
+        #reg-box {
+            border: 2px solid var(--aqua); padding: 30px; border-radius: 20px;
+            background: var(--dark); width: 100%; max-width: 320px;
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
+        }
+        input { 
+            width: 100%; padding: 12px; margin: 20px 0; border-radius: 8px; 
+            border: 1px solid var(--grey); background: #333; color: white; font-size: 1rem;
+            box-sizing: border-box; text-align: center;
+        }
+
+        /* Mission Card */
         #mission-card { margin: 15px; padding: 15px; border-radius: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(0,242,255,0.3); }
         .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; }
         .label { color: var(--aqua); font-weight: bold; }
 
-        /* Symmetrical Compass Hub */
-        #game-view { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        /* Branded Compass */
+        #game-view { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; }
         #compass-outer { 
             position: relative; width: 220px; height: 220px; 
-            border: 1px solid rgba(0, 242, 255, 0.3); border-radius: 50%;
+            border: 1px solid rgba(0, 242, 255, 0.2); border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
         }
         #compass-ring {
@@ -29,26 +64,24 @@
         .direction { 
             position: absolute; font-weight: 900; font-size: 1.4rem; color: var(--aqua);
             width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
-            transition: transform 0.1s linear; /* Counter-rotation for letters */
         }
-        /* Positioning directions on the ring */
         .n { top: 10px; left: calc(50% - 15px); }
         .s { bottom: 10px; left: calc(50% - 15px); }
         .e { right: 10px; top: calc(50% - 15px); }
         .w { left: 10px; top: calc(50% - 15px); }
 
-        /* Symmetrical Crosshair Center */
-        #center-hub {
-            width: 60px; height: 60px; border: 2px solid var(--aqua); border-radius: 50%;
-            position: relative; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+        #logo-hub {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: var(--dark); border: 2px solid var(--aqua);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+            z-index: 5; overflow: hidden;
         }
-        .crosshair-v { position: absolute; width: 2px; height: 20px; background: var(--aqua); }
-        .crosshair-h { position: absolute; width: 20px; height: 2px; background: var(--aqua); }
+        #logo-hub img { width: 75%; height: 75%; object-fit: contain; }
 
         #distance-big { font-size: 2.2rem; font-weight: 900; margin: 15px 0; color: var(--aqua); text-shadow: 0 0 10px rgba(0,242,255,0.5); }
 
-        /* Leaderboard Section */
+        /* Leaderboard */
         #leaderboard-section { background: #1a1a1a; padding: 15px; border-radius: 25px 25px 0 0; border-top: 2px solid var(--purple); }
         .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         select { background: var(--grey); color: white; border: 1px solid var(--aqua); padding: 5px; border-radius: 5px; font-size: 0.75rem; }
@@ -57,15 +90,27 @@
         .entry { display: grid; grid-template-columns: 25px 1.2fr 1fr 1.1fr 60px; align-items: center; padding: 10px 5px; border-bottom: 1px solid #222; font-size: 0.8rem; text-align: center; }
         
         .name { text-align: left; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .befriend-btn { background: transparent; border: 1px solid var(--aqua); color: var(--aqua); border-radius: 4px; padding: 3px; font-size: 0.6rem; cursor: pointer; width: 90%; margin: 0 auto;}
-        .points { font-family: monospace; color: var(--aqua); text-align: right; }
-
-        .btn { width: 85%; padding: 15px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; margin: 10px auto; display: block;}
-        #start-btn { background: var(--aqua); color: var(--dark); box-shadow: 0 4px 15px rgba(0,242,255,0.3); }
+        .befriend-btn { background: transparent; border: 1px solid var(--aqua); color: var(--aqua); border-radius: 4px; padding: 3px; font-size: 0.6rem; cursor: pointer; width: 90%; display: block; margin: 0 auto;}
+        
+        .btn { width: 85%; padding: 15px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; margin: 10px auto; display: block; transition: 0.2s;}
+        #start-btn-init { background: var(--aqua); color: var(--dark); }
+        #main-start-btn { background: var(--aqua); color: var(--dark); }
         #qr-btn { display: none; background: #2ecc71; color: white; }
+
+        footer { padding: 20px; text-align: center; margin-top: auto; }
+        .reset-link { background: none; border: 1px solid #444; color: #666; font-size: 0.7rem; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
+
+    <div id="reg-overlay">
+        <div id="reg-box">
+            <h2 style="color:var(--aqua); margin:0; letter-spacing:1px;">JOIN CHALLENGE</h2>
+            <p style="font-size:0.8rem; color:#aaa; margin-top:5px;">Enter your username to begin.</p>
+            <input type="text" id="username-input" placeholder="Enter Name" maxlength="12">
+            <button class="btn" id="start-btn-init" onclick="registerUser()">INITIALIZE</button>
+        </div>
+    </div>
 
     <header><h1>BECHACANT</h1></header>
 
@@ -78,18 +123,15 @@
     <div id="game-view">
         <div id="compass-outer">
             <div id="compass-ring">
-                <div class="direction n">N</div>
-                <div class="direction e">E</div>
-                <div class="direction s">S</div>
-                <div class="direction w">W</div>
+                <div class="direction n">N</div><div class="direction e">E</div>
+                <div class="direction s">S</div><div class="direction w">W</div>
             </div>
-            <div id="center-hub">
-                <div class="crosshair-v"></div>
-                <div class="crosshair-h"></div>
+            <div id="logo-hub">
+                <img src="logo.png" alt="B" id="becha-logo">
             </div>
         </div>
         <div id="distance-big">-- m</div>
-        <button id="start-btn" class="btn" onclick="startChallenge()">Initialize Scavenger</button>
+        <button id="main-start-btn" class="btn" onclick="startChallenge()">Start Hunt</button>
         <button id="qr-btn" class="btn" onclick="simulateWin()">Scan QR Code</button>
     </div>
 
@@ -109,48 +151,89 @@
         <div id="leaderboard-list"></div>
     </div>
 
+    <footer>
+        <button class="reset-link" onclick="resetTestData()">[Reset Account (Test)]</button>
+    </footer>
+
     <script>
+        // Target: Safe Place Foundation, Cedar Rapids
         const target = { lat: 41.9772, lng: -91.6611 };
-        const data = {
-            city: [["CerealKiller", 1250, 4.2], ["RiverKing", 1100, 12.8], ["Quaker88", 950, 2.1], ["BCC_Founder", 800, 1.2], ["GrantK", 750, 0.8]],
-            county: [["MarionMaster", 2100, 15.6], ["HiawathaHero", 1850, 9.4], ["CerealKiller", 1250, 4.2], ["LinnLurker", 1200, 22.1], ["ElyExplorer", 1000, 3.5]],
+        let currentUser = localStorage.getItem('bechaUser') || null;
+
+        // Base Simulated Data
+        let leaderboardData = {
+            city: [["CerealKiller", 1250, 4.2], ["RiverKing", 1100, 12.8], ["Quaker88", 950, 2.1], ["GrantK", 750, 0.8]],
+            county: [["MarionMaster", 2100, 15.6], ["HiawathaHero", 1850, 9.4], ["LinnLurker", 1200, 22.1], ["ElyExplorer", 1000, 3.5]],
             state: [["DM_Insure", 5000, 48.2], ["Hawkeye1", 4200, 31.5], ["CyclonePw", 3900, 28.9], ["MarionMaster", 2100, 15.6], ["IC_Intel", 1950, 11.2]]
         };
+
+        window.onload = () => {
+            if (currentUser) {
+                document.getElementById('reg-overlay').style.display = 'none';
+                updateLeaderboard();
+            }
+        };
+
+        function registerUser() {
+            const val = document.getElementById('username-input').value.trim();
+            if (val.length < 2) return alert("Please enter a username.");
+            currentUser = val;
+            localStorage.setItem('bechaUser', val);
+            document.getElementById('reg-overlay').style.display = 'none';
+            updateLeaderboard();
+        }
 
         function updateLeaderboard() {
             const filter = document.getElementById('geo-filter').value;
             const list = document.getElementById('leaderboard-list');
-            list.innerHTML = data[filter].map((user, i) => `
-                <div class="entry">
+            let displayList = [...leaderboardData[filter]];
+
+            // Insert live tester and pop the lowest ranked dummy
+            if (currentUser) {
+                if (!displayList.find(u => u[0] === currentUser)) {
+                    displayList.pop(); 
+                    displayList.push([currentUser, 0, 0.0]);
+                }
+            }
+
+            displayList.sort((a, b) => b[1] - a[1]);
+
+            list.innerHTML = displayList.map((user, i) => `
+                <div class="entry" style="${user[0] === currentUser ? 'background:rgba(0,242,255,0.1)' : ''}">
                     <span class="rank">${i+1}</span>
-                    <span class="name">${user[0]}</span>
+                    <span class="name" style="${user[0] === currentUser ? 'color:var(--aqua)' : ''}">${user[0]} ${user[0] === currentUser ? '[YOU]' : ''}</span>
                     <span style="color:#aaa">${user[2]} MI</span>
-                    <span class="social"><button class="befriend-btn" onclick="alert('Request Sent!')">+ BEFRIEND</button></span>
+                    <span class="social"><button class="befriend-btn">${user[0] === currentUser ? 'PROFILE' : '+ BEFRIEND'}</button></span>
                     <span class="points">${user[1]}</span>
                 </div>
             `).join('');
         }
 
         function startChallenge() {
-            document.getElementById('start-btn').style.display = 'none';
+            document.getElementById('main-start-btn').style.display = 'none';
             document.getElementById('move-status').innerText = "SEARCHING";
             
+            // Required for mobile browsers to allow orientation
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission();
+            }
+
             navigator.geolocation.watchPosition(pos => {
                 const dist = haversine(pos.coords.latitude, pos.coords.longitude, target.lat, target.lng);
                 document.getElementById('distance-big').innerText = Math.round(dist) + "m";
+                
                 if (dist < 20) {
                     document.getElementById('move-status').innerText = "ARRIVED";
                     document.getElementById('qr-btn').style.display = 'block';
+                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
                 }
             }, null, { enableHighAccuracy: true });
 
             window.addEventListener('deviceorientationabsolute', e => {
                 const north = e.alpha || 0;
-                // Rotate the ring
                 document.getElementById('compass-ring').style.transform = `rotate(${-north}deg)`;
-                // Counter-rotate the individual letters so they stay upright
-                const letters = document.querySelectorAll('.direction');
-                letters.forEach(l => {
+                // Keep Letters Upright
+                document.querySelectorAll('.direction').forEach(l => {
                     l.style.transform = `rotate(${north}deg)`;
                 });
             }, true);
@@ -158,14 +241,22 @@
 
         function haversine(lat1, lon1, lat2, lon2) {
             const R = 6371000;
-            const dLat = (lat2-lat1)*Math.PI/180;
-            const dLon = (lon2-lon1)*Math.PI/180;
+            const dLat = (lat2-lat1)*Math.PI/180; const dLon = (lon2-lon1)*Math.PI/180;
             const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        function simulateWin() { alert("Verified!"); location.reload(); }
-        updateLeaderboard();
+        function simulateWin() { 
+            alert("Verification Success! 50 Points earned for " + currentUser); 
+            location.reload(); 
+        }
+
+        function resetTestData() {
+            if(confirm("Wipe local username and mileage for testing?")) {
+                localStorage.removeItem('bechaUser');
+                location.reload();
+            }
+        }
     </script>
 </body>
 </html>
