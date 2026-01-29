@@ -59,7 +59,7 @@
         .hint-label { color: var(--aqua); font-weight: bold; font-size: 0.7rem; text-transform: uppercase; }
         .hint-text { margin-top: 5px; color: #fff; line-height: 1.2; }
         .locked { filter: blur(4px); opacity: 0.5; color: #666; }
-        .timer { float: right; font-family: monospace; color: var(--purple); font-weight: bold; }
+        .timer { float: right; font-family: monospace; color: white; font-weight: bold; }
 
         /* Leaderboard */
         #leaderboard-section { background: #1a1a1a; padding: 15px; border-radius: 25px 25px 0 0; border-top: 2px solid var(--purple); }
@@ -67,6 +67,22 @@
         select { background: var(--grey); color: white; border: 1px solid var(--aqua); padding: 5px; border-radius: 5px; font-size: 0.75rem; }
         .header-row { display: grid; grid-template-columns: 25px 1.2fr 1fr 1.1fr 60px; font-size: 0.65rem; color: var(--aqua); font-weight: bold; padding: 8px; border-bottom: 1px solid var(--grey); text-align: center; }
         .entry { display: grid; grid-template-columns: 25px 1.2fr 1fr 1.1fr 60px; align-items: center; padding: 10px 5px; border-bottom: 1px solid #222; font-size: 0.8rem; text-align: center; }
+
+        /* Branded Social Button */
+        .befriend-btn { 
+            background: linear-gradient(135deg, var(--purple), #6c3483); 
+            border: 1px solid var(--aqua); 
+            color: white; 
+            border-radius: 4px; 
+            padding: 4px; 
+            font-size: 0.6rem; 
+            cursor: pointer; 
+            width: 90%; 
+            display: block; 
+            margin: 0 auto;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+        .befriend-btn:hover { background: var(--aqua); color: var(--dark); border-color: var(--purple); }
 
         .btn { width: 90%; padding: 12px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; margin: 10px auto; display: block; }
         #init-btn { background: var(--aqua); color: var(--dark); }
@@ -92,11 +108,11 @@
     <div id="mission-header">
         <div class="mission-stat">
             <span class="m-label">Objective</span>
-            <span class="m-value">Secret Landmark</span>
+            <span class="m-value">Building</span>
         </div>
         <div class="mission-stat">
             <span class="m-label">Reward</span>
-            <span class="m-value">50 Points</span>
+            <span class="m-value">50 BechaPoints</span>
         </div>
         <div class="mission-stat">
             <span class="m-label">Type</span>
@@ -164,7 +180,6 @@
             if (currentUser) {
                 document.getElementById('reg-overlay').style.display = 'none';
                 updateLeaderboard();
-                startHintTimers();
             }
         };
 
@@ -175,11 +190,11 @@
             localStorage.setItem('bechaUser', val);
             document.getElementById('reg-overlay').style.display = 'none';
             updateLeaderboard();
-            startHintTimers();
         }
 
         function startHintTimers() {
             let seconds = 0;
+            if(hintInterval) clearInterval(hintInterval);
             hintInterval = setInterval(() => {
                 seconds++;
                 let t2 = 30 - seconds;
@@ -205,13 +220,15 @@
             list.innerHTML = baseData.map((u, i) => `
                 <div class="entry" style="${u[0] === currentUser ? 'background:rgba(0,242,255,0.1)' : ''}">
                     <span class="rank">${i+1}</span><span class="name" style="${u[0] === currentUser ? 'color:var(--aqua)' : ''}">${u[0]}</span>
-                    <span>${u[2]} MI</span><span class="social"><button class="befriend-btn">${u[0] === currentUser ? 'YOU' : '+ BEFRIEND'}</button></span><span style="color:var(--aqua)">${u[1]}</span>
+                    <span>${u[2]} MI</span><span class="social"><button class="befriend-btn">${u[0] === currentUser ? 'PROFILE' : '+ BEFRIEND'}</button></span><span style="color:var(--aqua)">${u[1]}</span>
                 </div>
             `).join('');
         }
 
         function startChallenge() {
             document.getElementById('main-start-btn').style.display = 'none';
+            startHintTimers(); // TIMERS NOW START HERE
+            
             if (typeof DeviceOrientationEvent.requestPermission === 'function') DeviceOrientationEvent.requestPermission();
             navigator.geolocation.watchPosition(pos => {
                 const dist = haversine(pos.coords.latitude, pos.coords.longitude, target.lat, target.lng);
