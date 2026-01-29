@@ -60,6 +60,7 @@
         .hint-text { margin-top: 5px; color: #fff; line-height: 1.2; }
         .locked { filter: blur(4px); opacity: 0.5; color: #666; }
         .timer { float: right; font-family: monospace; color: white; font-weight: bold; }
+        .timer small { font-size: 0.55rem; color: #ccc; margin-left: 1px; vertical-align: middle; }
 
         /* Leaderboard */
         #leaderboard-section { background: #1a1a1a; padding: 15px; border-radius: 25px 25px 0 0; border-top: 2px solid var(--purple); }
@@ -84,6 +85,19 @@
         }
         .befriend-btn:hover { background: var(--aqua); color: var(--dark); border-color: var(--purple); }
 
+        /* Custom Toast Notification */
+        #toast {
+            visibility: hidden; min-width: 250px; background: linear-gradient(to right, var(--purple), var(--dark)); 
+            color: white; text-align: center; border-radius: 10px; border: 1px solid var(--aqua);
+            padding: 16px; position: fixed; z-index: 200; left: 50%; bottom: 30px;
+            transform: translateX(-50%); font-size: 0.9rem; font-weight: bold;
+        }
+        #toast.show { visibility: visible; -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @-webkit-keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @-webkit-keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+
         .btn { width: 90%; padding: 12px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; margin: 10px auto; display: block; }
         #init-btn { background: var(--aqua); color: var(--dark); }
         #main-start-btn { background: var(--aqua); color: var(--dark); }
@@ -94,6 +108,8 @@
     </style>
 </head>
 <body>
+
+    <div id="toast">Friend Request Sent!</div>
 
     <div id="reg-overlay">
         <div id="reg-box">
@@ -146,11 +162,11 @@
                 <div class="hint-text" id="hint-1">Addiction Recovery</div>
             </div>
             <div class="hint-item">
-                <div class="hint-label">Clue #2 <span id="timer-2" class="timer">30s</span></div>
+                <div class="hint-label">Clue #2 <span id="timer-2" class="timer">30<small>s</small></span></div>
                 <div class="hint-text locked" id="hint-2">Men Only</div>
             </div>
             <div class="hint-item">
-                <div class="hint-label">Clue #3 <span id="timer-3" class="timer">60s</span></div>
+                <div class="hint-label">Clue #3 <span id="timer-3" class="timer">60<small>s</small></span></div>
                 <div class="hint-text locked" id="hint-3">Safely Downtown</div>
             </div>
         </div>
@@ -192,17 +208,24 @@
             updateLeaderboard();
         }
 
+        function showToast(name) {
+            const t = document.getElementById("toast");
+            t.innerText = `Request sent to ${name}!`;
+            t.className = "show";
+            setTimeout(() => { t.className = t.className.replace("show", ""); }, 3000);
+        }
+
         function startHintTimers() {
             let seconds = 0;
             if(hintInterval) clearInterval(hintInterval);
             hintInterval = setInterval(() => {
                 seconds++;
                 let t2 = 30 - seconds;
-                if (t2 > 0) { document.getElementById('timer-2').innerText = t2 + "s"; } 
+                if (t2 > 0) { document.getElementById('timer-2').innerHTML = t2 + "<small>s</small>"; } 
                 else { document.getElementById('timer-2').style.display = 'none'; document.getElementById('hint-2').classList.remove('locked'); }
 
                 let t3 = 60 - seconds;
-                if (t3 > 0) { document.getElementById('timer-3').innerText = t3 + "s"; } 
+                if (t3 > 0) { document.getElementById('timer-3').innerHTML = t3 + "<small>s</small>"; } 
                 else { document.getElementById('timer-3').style.display = 'none'; document.getElementById('hint-3').classList.remove('locked'); }
 
                 if (seconds >= 60) clearInterval(hintInterval);
@@ -220,14 +243,18 @@
             list.innerHTML = baseData.map((u, i) => `
                 <div class="entry" style="${u[0] === currentUser ? 'background:rgba(0,242,255,0.1)' : ''}">
                     <span class="rank">${i+1}</span><span class="name" style="${u[0] === currentUser ? 'color:var(--aqua)' : ''}">${u[0]}</span>
-                    <span>${u[2]} MI</span><span class="social"><button class="befriend-btn">${u[0] === currentUser ? 'PROFILE' : '+ BEFRIEND'}</button></span><span style="color:var(--aqua)">${u[1]}</span>
+                    <span>${u[2]} MI</span><span class="social">
+                        <button class="befriend-btn" onclick="${u[0] === currentUser ? 'alert(\'This is your profile!\')' : `showToast('${u[0]}')`}">
+                            ${u[0] === currentUser ? 'PROFILE' : '+ BEFRIEND'}
+                        </button>
+                    </span><span style="color:var(--aqua)">${u[1]}</span>
                 </div>
             `).join('');
         }
 
         function startChallenge() {
             document.getElementById('main-start-btn').style.display = 'none';
-            startHintTimers(); // TIMERS NOW START HERE
+            startHintTimers();
             
             if (typeof DeviceOrientationEvent.requestPermission === 'function') DeviceOrientationEvent.requestPermission();
             navigator.geolocation.watchPosition(pos => {
