@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BechaCant Scavenger Prototype</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; transition: background 0.5s; height: 100vh; margin: 0; display: flex; flex-direction: column; justify-content: center; }
+        #status { font-size: 2rem; font-weight: bold; margin-bottom: 20px; }
+        #distance { font-size: 1.2rem; }
+        .hot { background-color: #ff4d4d; color: white; }
+        .cold { background-color: #4da6ff; color: white; }
+        .on-fire { background-color: #ff0000; color: white; animation: blink 0.5s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        button { padding: 15px 30px; font-size: 1rem; cursor: pointer; border-radius: 10px; border: none; background: #333; color: white; }
+    </style>
+</head>
+<body>
+
+    <div id="status">Ready to Hunt?</div>
+    <div id="distance">Distance: -- meters</div>
+    <br>
+    <button onclick="startHunt()">Start Hunt</button>
+
+    <script>
+        // TARGET COORDINATES (Set these to your test location!)
+        // Default: Cedar Rapids Museum of Art
+        const target = { lat: 41.9778, lng: -91.6656 }; 
+        
+        let lastDistance = null;
+
+        function startHunt() {
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by your browser.");
+                return;
+            }
+
+            document.querySelector('button').style.display = 'none';
+            document.getElementById('status').innerText = "Walking...";
+
+            // watchPosition updates in real-time as you move
+            navigator.geolocation.watchPosition(updatePosition, handleError, {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 5000
+            });
+        }
+
+        function updatePosition(position) {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+            const dist = haversineDistance(userLat, userLng, target.lat, target.lng);
+            
+            const distElement = document.getElementById('distance');
+            const statusElement = document.getElementById('status');
+            const body = document.body;
+
+            distElement.innerText = `Distance: ${Math.round(dist)} meters`;
+
+            // Logic for Hot vs Cold
+            if (dist <= 20) {
+                statusElement.innerText = "CHALLENGE COMPLETE!";
+                body.className = "on-fire";
+            } else if (lastDistance === null) {
+                statusElement.innerText = "Find the Spot!";
+            } else if (dist < lastDistance) {
+                statusElement.innerText = "HOTTER!";
+                body.className = "hot";
+            } else {
+                statusElement.innerText = "COLDER...";
+                body.className = "cold";
+            }
+
+            lastDistance = dist;
+        }
+
+        // The Haversine Formula (Calculates distance in meters)
+        function haversineDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371000; // Earth radius in meters
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function handleError(err) {
+            console.warn(`ERROR(${err.code}): ${err.message}`);
+        }
+    </script>
+</body>
+</html>
