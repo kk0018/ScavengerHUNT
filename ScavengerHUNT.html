@@ -25,28 +25,41 @@
         #reg-box { border: 2px solid var(--aqua); padding: 30px; border-radius: 20px; background: var(--dark); width: 100%; max-width: 320px; box-shadow: 0 0 30px rgba(0, 242, 255, 0.2); }
         input { width: 100%; padding: 12px; margin: 20px 0; border-radius: 8px; border: 1px solid var(--grey); background: #333; color: white; font-size: 1rem; text-align: center; }
 
+        /* Mission Briefing Header */
+        #mission-header {
+            margin: 10px 15px; padding: 12px; border-radius: 10px;
+            background: rgba(0, 242, 255, 0.05); border: 1px solid rgba(0, 242, 255, 0.2);
+            display: flex; justify-content: space-around; text-align: center;
+        }
+        .mission-stat { display: flex; flex-direction: column; }
+        .m-label { color: var(--aqua); font-size: 0.65rem; font-weight: bold; text-transform: uppercase; margin-bottom: 3px; }
+        .m-value { font-size: 0.9rem; font-weight: bold; }
+
         /* Main Content Layout */
         #main-container { display: flex; flex-direction: row; flex-grow: 1; padding: 10px; align-items: flex-start; gap: 10px; }
 
         /* Compass Section (Left) */
         #left-col { flex: 1.2; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #compass-outer { position: relative; width: 180px; height: 180px; border: 1px solid rgba(0, 242, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        #compass-outer { position: relative; width: 160px; height: 160px; border: 1px solid rgba(0, 242, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         #compass-ring { position: absolute; width: 100%; height: 100%; transition: transform 0.1s linear; }
         .direction { position: absolute; font-weight: 900; font-size: 1.1rem; color: var(--aqua); width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; }
         .n { top: 5px; left: calc(50% - 12.5px); } .s { bottom: 5px; left: calc(50% - 12.5px); } .e { right: 5px; top: calc(50% - 12.5px); } .w { left: 5px; top: calc(50% - 12.5px); }
-        #center-hub { width: 60px; height: 60px; border-radius: 50%; background: var(--dark); border: 2px solid var(--aqua); display: flex; align-items: center; justify-content: center; z-index: 5; position: relative; }
-        .plus-v { position: absolute; width: 3px; height: 20px; background: var(--aqua); }
-        .plus-h { position: absolute; width: 20px; height: 3px; background: var(--aqua); }
+        #center-hub { width: 50px; height: 50px; border-radius: 50%; background: var(--dark); border: 2px solid var(--aqua); display: flex; align-items: center; justify-content: center; z-index: 5; position: relative; }
+        .plus-v { position: absolute; width: 3px; height: 18px; background: var(--aqua); }
+        .plus-h { position: absolute; width: 18px; height: 3px; background: var(--aqua); }
 
-        /* Hints Section (Right) */
+        /* Distance Display */
+        #distance-container { text-align: center; margin-top: 10px; }
+        #distance-big { font-size: 1.8rem; font-weight: 900; color: var(--aqua); margin: 0; }
+        #distance-label { font-size: 0.65rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Clues Section (Right) */
         #right-col { flex: 0.8; background: rgba(255,255,255,0.05); border: 1px solid var(--grey); border-radius: 12px; padding: 10px; min-height: 250px; }
-        .hint-item { border-bottom: 1px solid #333; padding: 10px 0; font-size: 0.85rem; transition: 0.3s; }
+        .hint-item { border-bottom: 1px solid #333; padding: 10px 0; font-size: 0.85rem; }
         .hint-label { color: var(--aqua); font-weight: bold; font-size: 0.7rem; text-transform: uppercase; }
-        .hint-text { margin-top: 5px; color: #fff; }
+        .hint-text { margin-top: 5px; color: #fff; line-height: 1.2; }
         .locked { filter: blur(4px); opacity: 0.5; color: #666; }
         .timer { float: right; font-family: monospace; color: var(--purple); font-weight: bold; }
-
-        #distance-big { font-size: 1.8rem; font-weight: 900; margin: 10px 0; color: var(--aqua); }
 
         /* Leaderboard */
         #leaderboard-section { background: #1a1a1a; padding: 15px; border-radius: 25px 25px 0 0; border-top: 2px solid var(--purple); }
@@ -54,7 +67,6 @@
         select { background: var(--grey); color: white; border: 1px solid var(--aqua); padding: 5px; border-radius: 5px; font-size: 0.75rem; }
         .header-row { display: grid; grid-template-columns: 25px 1.2fr 1fr 1.1fr 60px; font-size: 0.65rem; color: var(--aqua); font-weight: bold; padding: 8px; border-bottom: 1px solid var(--grey); text-align: center; }
         .entry { display: grid; grid-template-columns: 25px 1.2fr 1fr 1.1fr 60px; align-items: center; padding: 10px 5px; border-bottom: 1px solid #222; font-size: 0.8rem; text-align: center; }
-        .befriend-btn { background: transparent; border: 1px solid var(--aqua); color: var(--aqua); border-radius: 4px; padding: 3px; font-size: 0.6rem; cursor: pointer; width: 90%; display: block; margin: 0 auto;}
 
         .btn { width: 90%; padding: 12px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; margin: 10px auto; display: block; }
         #init-btn { background: var(--aqua); color: var(--dark); }
@@ -77,6 +89,21 @@
 
     <header><h1>BECHACANT</h1></header>
 
+    <div id="mission-header">
+        <div class="mission-stat">
+            <span class="m-label">Objective</span>
+            <span class="m-value">Secret Landmark</span>
+        </div>
+        <div class="mission-stat">
+            <span class="m-label">Reward</span>
+            <span class="m-value">50 Points</span>
+        </div>
+        <div class="mission-stat">
+            <span class="m-label">Type</span>
+            <span class="m-value">Scavenger</span>
+        </div>
+    </div>
+
     <div id="main-container">
         <div id="left-col">
             <div id="compass-outer">
@@ -86,23 +113,28 @@
                 </div>
                 <div id="center-hub"><div class="plus-v"></div><div class="plus-h"></div></div>
             </div>
-            <div id="distance-big">-- m</div>
+            
+            <div id="distance-container">
+                <div id="distance-label">Objective Distance</div>
+                <div id="distance-big">-- m</div>
+            </div>
+
             <button id="main-start-btn" class="btn" onclick="startChallenge()">Start Hunt</button>
             <button id="qr-btn" class="btn" onclick="simulateWin()">Scan QR Code</button>
         </div>
 
         <div id="right-col">
-            <h3 style="margin-top:0; font-size:0.9rem; color:var(--aqua);">MISSION INTEL</h3>
+            <h3 style="margin-top:0; font-size:0.8rem; color:var(--aqua); text-transform:uppercase; letter-spacing:1px;">Scavenger Clues</h3>
             <div class="hint-item">
-                <div class="hint-label">Hint #1</div>
+                <div class="hint-label">Clue #1</div>
                 <div class="hint-text" id="hint-1">Addiction Recovery</div>
             </div>
             <div class="hint-item">
-                <div class="hint-label">Hint #2 <span id="timer-2" class="timer">30s</span></div>
+                <div class="hint-label">Clue #2 <span id="timer-2" class="timer">30s</span></div>
                 <div class="hint-text locked" id="hint-2">Men Only</div>
             </div>
             <div class="hint-item">
-                <div class="hint-label">Hint #3 <span id="timer-3" class="timer">60s</span></div>
+                <div class="hint-label">Clue #3 <span id="timer-3" class="timer">60s</span></div>
                 <div class="hint-text locked" id="hint-3">Safely Downtown</div>
             </div>
         </div>
@@ -150,24 +182,13 @@
             let seconds = 0;
             hintInterval = setInterval(() => {
                 seconds++;
-                
-                // Hint #2 Logic (30 Seconds)
-                let time2 = 30 - seconds;
-                if (time2 > 0) {
-                    document.getElementById('timer-2').innerText = time2 + "s";
-                } else {
-                    document.getElementById('timer-2').style.display = 'none';
-                    document.getElementById('hint-2').classList.remove('locked');
-                }
+                let t2 = 30 - seconds;
+                if (t2 > 0) { document.getElementById('timer-2').innerText = t2 + "s"; } 
+                else { document.getElementById('timer-2').style.display = 'none'; document.getElementById('hint-2').classList.remove('locked'); }
 
-                // Hint #3 Logic (60 Seconds)
-                let time3 = 60 - seconds;
-                if (time3 > 0) {
-                    document.getElementById('timer-3').innerText = time3 + "s";
-                } else {
-                    document.getElementById('timer-3').style.display = 'none';
-                    document.getElementById('hint-3').classList.remove('locked');
-                }
+                let t3 = 60 - seconds;
+                if (t3 > 0) { document.getElementById('timer-3').innerText = t3 + "s"; } 
+                else { document.getElementById('timer-3').style.display = 'none'; document.getElementById('hint-3').classList.remove('locked'); }
 
                 if (seconds >= 60) clearInterval(hintInterval);
             }, 1000);
@@ -211,10 +232,7 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        function resetTestData() {
-            if(confirm("Wipe local username and mileage?")) { localStorage.removeItem('bechaUser'); location.reload(); }
-        }
-
+        function resetTestData() { if(confirm("Wipe local data?")) { localStorage.removeItem('bechaUser'); location.reload(); } }
         function simulateWin() { alert("Verification Success!"); location.reload(); }
     </script>
 </body>
